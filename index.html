@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unhunch — Project Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #F7F6F3;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #1C1B18;
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #1C1B18 0%, #2D2B26 100%);
+    padding: 4rem 2rem 3rem;
+  }
+  .header-inner { max-width: 680px; margin: 0 auto; }
+  .eyebrow {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
+  }
+  .icon {
+    width: 2.5rem; height: 2.5rem; background: #FF5E3A;
+    border-radius: 0.6rem; display: inline-flex;
+    align-items: center; justify-content: center; font-size: 1.2rem;
+  }
+  .label {
+    color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; font-family: monospace;
+  }
+  h1 {
+    font-size: 3rem; font-weight: 800; color: #fff;
+    margin-bottom: 1rem; line-height: 1.1; letter-spacing: -0.03em;
+  }
+  h1 span { color: #FF5E3A; }
+  .desc {
+    font-size: 1.05rem; color: rgba(255,255,255,0.65); line-height: 1.6; max-width: 520px;
+  }
+  .cards { max-width: 680px; margin: 0 auto; padding: 3rem 2rem 4rem; display: grid; gap: 1.25rem; }
+  .card {
+    display: block; background: #fff; border: 1px solid #E8E5DF;
+    border-radius: 0.9rem; padding: 1.75rem 2rem; text-decoration: none;
+    color: inherit; transition: border-color 0.15s, transform 0.15s;
+  }
+  .card:hover { border-color: #FF5E3A; transform: translateY(-2px); }
+  .card h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .card p { font-size: 0.95rem; color: #6B675E; line-height: 1.55; }
+  .card .go { display: inline-block; margin-top: 0.9rem; color: #FF5E3A; font-weight: 500; font-size: 0.9rem; }
+  .footer { max-width: 680px; margin: 0 auto; padding: 0 2rem 3rem; font-size: 0.85rem; color: #9C978C; }
+  .footer a { color: #6B675E; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow">
+      <span class="icon">🦴</span>
+      <span class="label">Project Documentation</span>
+    </div>
+    <h1>Unhunch<span>.</span></h1>
+    <p class="desc">A mobile-first posture &amp; mobility app for desk workers — a personal project built with Replit's AI agent, from written spec to sequenced build prompts to shipped app.</p>
+  </div>
+</div>
+
+<div class="cards">
+  <a class="card" href="unhunch-spec.html">
+    <h2>Software Specification</h2>
+    <p>The full product and technical spec written before any code: features, accessibility requirements, data model, routine-generation contract, and phased build plan.</p>
+    <span class="go">Read the spec &rarr;</span>
+  </a>
+  <a class="card" href="unhunch-build.html">
+    <h2>Build Prompts</h2>
+    <p>The 10 sequenced prompts used to direct the AI agent through the build, ordered easiest to hardest — each one scoping a single feature with explicit constraints.</p>
+    <span class="go">Read the prompts &rarr;</span>
+  </a>
+</div>
+
+<div class="footer">
+  A personal project by Robyn Armes &middot; <a href="https://www.linkedin.com/in/robynarmes/">LinkedIn</a>
+</div>
+
+</body>
+</html>

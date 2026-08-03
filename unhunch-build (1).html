@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unhunch — Build Prompts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #F7F6F3;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #1C1B18;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .header {
+    background: linear-gradient(135deg, #1C1B18 0%, #2D2B26 100%);
+    padding: 4rem 3rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-blob1 {
+    position: absolute; top: -4rem; right: -4rem;
+    width: 20rem; height: 20rem; border-radius: 50%;
+    background: #FF5E3A; opacity: 0.08; filter: blur(5rem);
+  }
+  .header-blob2 {
+    position: absolute; bottom: -4rem; left: 30%;
+    width: 18rem; height: 18rem; border-radius: 50%;
+    background: #7C6BF0; opacity: 0.10; filter: blur(5rem);
+  }
+  .header-inner { position: relative; z-index: 1; max-width: 740px; }
+  .header-eyebrow {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;
+  }
+  .header-icon {
+    width: 2.5rem; height: 2.5rem; background: #FF5E3A;
+    border-radius: 0.6rem; display: inline-flex;
+    align-items: center; justify-content: center; font-size: 1.2rem;
+  }
+  .header-label {
+    color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; font-family: monospace;
+  }
+  h1.doc-title {
+    font-size: 3.5rem; font-weight: 800; color: #fff;
+    margin: 0 0 1rem; line-height: 1.1; letter-spacing: -0.03em;
+  }
+  h1.doc-title span { color: #FF5E3A; }
+  .header-desc {
+    font-size: 1.1rem; color: rgba(255,255,255,0.65);
+    margin: 0 0 2rem; line-height: 1.6; max-width: 500px;
+  }
+  .header-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .header-tag {
+    padding: 0.3rem 0.8rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px; color: rgba(255,255,255,0.75);
+    font-size: 0.78rem; font-weight: 500; font-family: monospace;
+  }
+  .body { max-width: 740px; margin: 0 auto; padding: 3.5rem 2rem 6rem; }
+  .section { margin-bottom: 3.5rem; break-inside: avoid-page; }
+  .section-heading {
+    display: flex; align-items: baseline; gap: 0.75rem;
+    margin-bottom: 1.5rem; border-bottom: 2px solid #E8E5DF;
+    padding-bottom: 0.75rem; break-after: avoid;
+  }
+  .section-num {
+    font-size: 0.85rem; font-weight: 700; color: #FF5E3A;
+    font-family: monospace; letter-spacing: 0.05em;
+  }
+  h2.section-title {
+    font-size: 1.5rem; font-weight: 700; color: #1C1B18;
+    letter-spacing: -0.02em;
+  }
+  .subsection { margin-bottom: 2.5rem; break-inside: avoid; }
+  .subsection-heading {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 1rem; break-after: avoid;
+  }
+  .subsection-id {
+    font-size: 0.75rem; font-weight: 600; color: #7C6BF0; font-family: monospace;
+  }
+  h3.subsection-title { font-size: 1.1rem; font-weight: 600; color: #1C1B18; }
+  .bullet {
+    display: flex; gap: 0.75rem; margin-bottom: 0.6rem;
+    align-items: flex-start; break-inside: avoid;
+  }
+  .bullet-dot { color: #FF5E3A; font-size: 0.9rem; margin-top: 0.15rem; flex-shrink: 0; }
+  .bullet p { font-size: 0.95rem; line-height: 1.7; color: #6B6860; }
+  .card {
+    background: #FFFFFF; border: 1px solid #E8E5DF; border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04); break-inside: avoid;
+  }
+  .card-title { margin-bottom: 0.35rem; font-weight: 700; color: #1C1B18; font-size: 0.85rem; }
+  .card p { font-size: 0.875rem; line-height: 1.65; color: #6B6860; }
+  .alert {
+    border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem; break-inside: avoid;
+  }
+  .alert-coral { background: #FF5E3A0D; border: 1px solid #FF5E3A30; }
+  .alert-purple { background: #7C6BF00D; border: 1px solid #7C6BF030; }
+  .alert-label {
+    margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .alert-coral .alert-label { color: #FF5E3A; }
+  .alert-purple .alert-label { color: #7C6BF0; }
+  .alert p { font-size: 0.875rem; line-height: 1.6; color: #6B6860; }
+  pre {
+    background: #F0EFE9; border: 1px solid #E8E5DF; border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem; font-size: 0.78rem; line-height: 1.75;
+    overflow-x: auto; font-family: 'Fira Code', 'Cascadia Code', monospace;
+    color: #3D3B35; margin: 1rem 0; white-space: pre; break-inside: avoid;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; break-inside: avoid; }
+  thead tr { background: #1C1B18; }
+  thead th {
+    padding: 0.75rem 1rem; text-align: left; color: #fff;
+    font-weight: 600; font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  tbody tr:nth-child(even) { background: #F9F8F5; }
+  tbody tr:nth-child(odd) { background: #FFFFFF; }
+  tbody td { padding: 0.875rem 1rem; color: #6B6860; border-bottom: 1px solid #E8E5DF; line-height: 1.5; }
+  tbody td:first-child { font-weight: 600; color: #1C1B18; }
+  .tag {
+    display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 600; font-family: monospace;
+    background: #FF5E3A18; color: #FF5E3A;
+    margin-right: 0.4rem; margin-bottom: 0.3rem;
+  }
+  .step-card {
+    display: flex; gap: 1rem; margin-bottom: 0.875rem;
+    background: #FFFFFF; border: 1px solid #E8E5DF;
+    border-radius: 0.75rem; padding: 1rem 1.25rem; break-inside: avoid;
+  }
+  .step-label { flex-shrink: 0; width: 5rem; padding-top: 0.1rem; }
+  .step-label-num { font-size: 0.7rem; font-weight: 700; color: #FF5E3A; font-family: monospace; display: block; }
+  .step-label-name { font-size: 0.82rem; font-weight: 600; color: #1C1B18; }
+  .step-card p { font-size: 0.875rem; line-height: 1.65; color: #6B6860; }
+  .numbered-step { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 0.75rem; }
+  .step-num {
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    background: #FF5E3A20; color: #FF5E3A; font-size: 0.75rem; font-weight: 700;
+    flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; margin-top: 0.1rem;
+  }
+  .numbered-step p { font-size: 0.875rem; line-height: 1.65; color: #6B6860; }
+  .phase-card {
+    display: flex; gap: 1.25rem; margin-bottom: 1rem; padding: 1.25rem;
+    background: #FFFFFF; border: 1px solid #E8E5DF; border-radius: 0.75rem; break-inside: avoid;
+  }
+  .phase-bar { width: 0.25rem; border-radius: 999px; flex-shrink: 0; }
+  .phase-title { margin-bottom: 0.35rem; font-weight: 700; color: #1C1B18; font-size: 0.9rem; }
+  .phase-desc { font-size: 0.875rem; color: #6B6860; line-height: 1.65; }
+  .doc-footer {
+    border-top: 2px solid #E8E5DF; padding-top: 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-brand { display: flex; align-items: center; gap: 0.6rem; }
+  .footer-icon {
+    width: 1.75rem; height: 1.75rem; background: #FF5E3A;
+    border-radius: 0.4rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem;
+  }
+  .footer-name { font-weight: 700; color: #1C1B18; font-size: 0.95rem; }
+  .footer-meta { font-size: 0.8rem; color: #6B6860; font-family: monospace; }
+  p.body-text { font-size: 0.95rem; line-height: 1.8; color: #6B6860; margin-bottom: 1.25rem; }
+  code {
+    background: #F0EFE9; padding: 0.1rem 0.4rem; border-radius: 0.3rem; font-size: 0.85em;
+  }
+  @media print {
+    .section, .subsection, .card, .step-card, .phase-card, .alert, pre, table { break-inside: avoid; }
+    .section-heading, .subsection-heading { break-after: avoid; }
+  }
+
+.progress-strip {
+  background: #FFFFFF; border-bottom: 1px solid #E8E5DF;
+  padding: 1rem 3rem; display: flex; gap: 0.4rem; overflow-x: auto;
+}
+.prompt-card { margin-bottom: 3rem; break-inside: avoid; }
+.prompt-header {
+  display: flex; align-items: flex-start; gap: 1.25rem;
+  margin-bottom: 1rem; break-after: avoid;
+}
+.prompt-num {
+  width: 3rem; height: 3rem; border-radius: 0.75rem;
+  background: linear-gradient(135deg, #FF5E3A22, #7C6BF022);
+  border: 1px solid #FF5E3A30;
+  color: #FF5E3A; font-weight: 800; font-size: 0.85rem;
+  font-family: monospace; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.prompt-title { margin: 0 0 0.5rem; font-size: 1.25rem; font-weight: 700; color: #1C1B18; letter-spacing: -0.02em; }
+.ptags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.ptag {
+  padding: 0.15rem 0.55rem; border-radius: 999px;
+  font-size: 0.7rem; font-weight: 600; font-family: monospace;
+  background: #7C6BF012; color: #7C6BF0;
+}
+.prompt-body {
+  background: #FFFFFF; border: 1px solid #E8E5DF;
+  border-radius: 0.875rem; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04); break-inside: avoid;
+}
+.prompt-chrome {
+  background: #1C1B18; padding: 0.6rem 1rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.chrome-dots { display: flex; gap: 0.4rem; }
+.dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; }
+.chrome-label { font-size: 0.7rem; color: rgba(255,255,255,0.35); font-family: monospace; }
+.prompt-text { padding: 1.5rem; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-blob1"></div>
+  <div class="header-blob2"></div>
+  <div class="header-inner">
+    <div class="header-eyebrow">
+      <span class="header-icon">🔨</span>
+      <span class="header-label">Build Prompts</span>
+    </div>
+    <h1 class="doc-title">Unhunch<span>.</span></h1>
+    <p class="header-desc">10 sequential Replit build prompts — paste them in order. Each prompt picks up exactly where the last one left off.</p>
+    <div class="header-tags">
+      <span class="header-tag">10 prompts</span>
+      <span class="header-tag">Step-by-step</span>
+      <span class="header-tag">Replit-ready</span>
+    </div>
+  </div>
+</div>
+
+<div class="progress-strip">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">01</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Foundation</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">02</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Onboarding Wizard</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">03</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Session Player (Static Routines)</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">04</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Progress & Pain Tracking</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">05</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Daily Streaks</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">06</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Settings & Data Portability</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">07</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Spine Mascot — Sunny</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">08</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Streak Skeleton</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">09</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Rules-Based Routine Generator</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;flex-shrink:0;">
+    <div style="width:2rem;height:2rem;border-radius:50%;background:#FF5E3A20;color:#FF5E3A;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;">10</div>
+    <span style="font-size:0.6rem;color:#6B6860;text-align:center;max-width:3rem;line-height:1.3;">Accessibility & Polish Pass</span>
+  </div></div>
+
+<div class="body">
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">01</div>
+      <div>
+        <h2 class="prompt-title">Prompt 01: Foundation</h2>
+        <div class="ptags"><span class="ptag">Scaffold</span><span class="ptag">PWA</span><span class="ptag">localStorage</span><span class="ptag">Tailwind</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_01.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">I'm building "Unhunch," a mobile-first web app for desk workers with rounded shoulders and upper-back/neck pain. It generates short mobility routines matched to the user's equipment, mobility constraints, and time, and tracks pain, sessions, and daily streaks with a playful spine mascot. We will build it step by step across multiple prompts — do NOT build everything now. In this prompt, only set up the foundation.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Tech stack: React + Vite frontend with Tailwind CSS, Express (Node) backend in the same Repl. In production, Express serves the built client. No database — all user data lives in browser localStorage for now. Add a PWA manifest and icons so it can install to a phone home screen. Mobile-first: design for ~390px wide screens, large touch targets (44px+).</p><div class="bullet"><span class="bullet-dot">•</span><p>Build now:</p></div><div class="bullet"><span class="bullet-dot">•</span><p>Project scaffold with client and server folders, dev + production scripts.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>A versioned localStorage wrapper module at client/src/lib/storage.ts with get/set helpers and a schemaVersion field (start at 1) plus a migrate() stub.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>An app shell with bottom tab navigation: Home, History, Settings (placeholder screens are fine).</p></div><div class="bullet"><span class="bullet-dot">•</span><p>A simple warm, friendly visual theme: soft cream/off-white background, one coral accent color, rounded cards, sans-serif. No content yet beyond placeholders.</p></div><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Do not build onboarding, exercises, or any API calls yet. Confirm the app runs and installs as a PWA before we continue.</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">02</div>
+      <div>
+        <h2 class="prompt-title">Prompt 02: Onboarding Wizard</h2>
+        <div class="ptags"><span class="ptag">4-step wizard</span><span class="ptag">Profile</span><span class="ptag">Accessibility</span><span class="ptag">localStorage</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_02.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Now build the first-run onboarding wizard. It should appear automatically when no profile exists in localStorage, and be re-editable later from Settings ("Edit profile"). Four steps, one screen each, big thumb-friendly controls, progress dots at the top.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Step 1 — Goals & symptoms: multi-select chips: rounded shoulders, neck pain, shoulder pain, upper-back stiffness, low-back ache, just prevention. For each pain-related selection, show an optional 0–10 slider labeled "How much does it bother you today?" — these seed the pain-tracking baseline.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Step 2 — Equipment: multi-select with simple icons: None/bodyweight only, Wall, Desk & chair (pre-checked, cannot uncheck), Resistance bands (with light/medium/heavy sub-select), Pull-up bar, Doorway, Foam roller, Light dumbbells.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Step 3 — Mobility & constraints: (a) Position capabilities multi-select: can stand, can walk, can get down to and up from the floor, seated only / wheelchair user. Selecting "seated only" auto-deselects the others. (b) "Areas to avoid loading" chips: wrists, elbows, left shoulder, right shoulder, neck, lower back, hips, knees, ankles. (c) A free-text field: "Anything else we should know? (injuries, surgeries, pregnancy...)". (d) A prominent "None of these apply — skip" button.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Step 4 — Time: session length choice: 5, 10, 15, or 20 minutes, with 5 minutes visually promoted as "Great for building a daily habit." Frame the commitment as "a few minutes every day."</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Save the whole profile to localStorage using the storage module. After finishing, land on Home. Include a short disclaimer on the final step.</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">03</div>
+      <div>
+        <h2 class="prompt-title">Prompt 03: Session Player (Static Routines)</h2>
+        <div class="ptags"><span class="ptag">Session</span><span class="ptag">Exercises</span><span class="ptag">Timer</span><span class="ptag">Skip</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_03.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Build the session player using static routines for now (the AI generator comes later).</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Create client/src/data/fallbackRoutines.ts containing 4 hand-written routines, each an ordered list of 5–7 exercises. One routine per profile type: (1) seated-only, (2) wall + desk only, (3) bands available, (4) pull-up bar available. Every exercise object: { id, name, targetArea, position: "seated"|"standing"|"floor"|"wall", equipment, durationSeconds OR reps, instructions (2–4 plain sentences), whyThisHelps (1 sentence), modification (string or null) }.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Choose gentle, safe, well-known posture exercises (wall angels, band pull-aparts, doorway pec stretch, chin tucks, seated thoracic rotations, dead hangs only for the pull-up bar routine). Seated-only routine must contain zero standing or floor exercises.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">A "Start today's session" button on Home picks the best-matching routine for the stored profile. Session player: full-screen, one exercise at a time. Show name, position badge, instructions, "why this helps." Timed exercises get a large countdown with a gentle chime; rep exercises get a "Done" button. Big Next/Back buttons. Include a "Can't do this one" button that asks why (Pain / No equipment / Unclear) and skips forward, logging the skip.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Session end screen: for each area in the user's painBaseline, a 0–10 slider; a 1–5 difficulty rating; a Finish button. Save to localStorage.</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">04</div>
+      <div>
+        <h2 class="prompt-title">Prompt 04: Progress & Pain Tracking</h2>
+        <div class="ptags"><span class="ptag">Recharts</span><span class="ptag">Sparklines</span><span class="ptag">History</span><span class="ptag">Insights</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_04.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Build progress and pain tracking on Home and History.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Home: under the start button, show a small 30-day sparkline for each tracked pain area with a plain-language trend label: "improving" (30-day average clearly falling), "steady," or "worse this week" (7-day average above 30-day average). Use Recharts.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">History screen: (1) a monthly calendar view where each day with a completed session gets a filled dot; (2) a list of past sessions (date, duration, completed/partial, difficulty); (3) a simple honest insights card computed with plain rules, e.g. "9 sessions this month. Neck pain average: 5.1 → 3.8." Never phrase insights as medical claims — correlations only.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">If a tracked pain area has averaged 7 or higher for the last 14 days, show a gentle non-alarming banner suggesting they check in with a healthcare professional.</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">05</div>
+      <div>
+        <h2 class="prompt-title">Prompt 05: Daily Streaks</h2>
+        <div class="ptags"><span class="ptag">Streaks</span><span class="ptag">Streak freeze</span><span class="ptag">Calendar</span><span class="ptag">Confetti</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_05.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Build daily streaks. A streak is consecutive calendar days with at least one completed session — even a 5-minute one counts. Compute streaks in a dedicated module client/src/lib/streaks.ts with unit-testable pure functions (input: array of session dates; output: current streak, best streak).</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Rules: (1) One automatic "streak freeze" per calendar month: the first missed day each month is silently forgiven and the streak continues; show a small "freeze used" marker on that calendar day. (2) A second missed day breaks the streak. Store { current, best, freezeUsedThisMonth } and recompute on app load and session completion.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">UI: a streak widget on Home showing current streak with a flame or bone icon, best streak, and freeze status ("1 freeze available this month"). On the History calendar, streak days form a visually connected run. When a session completion extends the streak, celebrate briefly (confetti burst) — respect prefers-reduced-motion by swapping animation for a static congratulations.</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">06</div>
+      <div>
+        <h2 class="prompt-title">Prompt 06: Settings & Data Portability</h2>
+        <div class="ptags"><span class="ptag">Settings</span><span class="ptag">Export</span><span class="ptag">Import</span><span class="ptag">Disclaimer</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_06.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Build Settings and data portability.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Settings screen: (1) Edit profile — reopens the onboarding wizard prefilled with current values; any saved change clears the cached routine. (2) Export data — downloads a single JSON file containing schemaVersion, profile, sessions, painLogs, and streak. (3) Import data — file picker that validates the JSON shape, warns that importing replaces current data, and requires a confirm tap before writing. (4) The medical disclaimer text, always visible. (5) An "About" line with app version.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Also add a small first-line-of-defense guard: if localStorage is unavailable (private browsing), show a friendly warning that progress won't be saved.</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">07</div>
+      <div>
+        <h2 class="prompt-title">Prompt 07: Spine Mascot — Sunny</h2>
+        <div class="ptags"><span class="ptag">SVG</span><span class="ptag">Animation</span><span class="ptag">CSS transitions</span><span class="ptag">Mascot</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_07.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Build the session mascot: a friendly cartoon spine with a smiley skull, rendered as one inline SVG component (client/src/components/SpineMascot.tsx). No animation libraries — SVG + CSS transitions only.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">The mascot has a skull with a face and a stack of vertebrae (one vertebra per exercise in the current routine, minimum 5). States: (1) "slumped" — vertebrae offset in a C-curve, sleepy half-closed eyes, flat mouth; (2) intermediate — as each exercise completes, the next vertebra animates into vertical alignment with a small springy snap and the face gets progressively happier; (3) "aligned" — perfectly stacked spine, big smile, rosy cheeks, two sparkle shapes. Skipped exercises still align their vertebra, just without the sparkle flourish.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Show the mascot: small on Home (reflecting whether today's session is done), and prominently in the session player above the exercise card, updating live as exercises complete. All state changes must be instant (no motion) when prefers-reduced-motion is set. The mascot must render identically for all users — its framing is "aligned and strong," never "stand up straight."</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">08</div>
+      <div>
+        <h2 class="prompt-title">Prompt 08: Streak Skeleton</h2>
+        <div class="ptags"><span class="ptag">SVG</span><span class="ptag">30-day streak</span><span class="ptag">Bone assembly</span><span class="ptag">Celebration</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_08.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Build the streak skeleton: a full cartoon skeleton assembled bone-by-bone as the daily streak grows, in client/src/components/StreakSkeleton.tsx as layered inline SVG.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Assembly order across a 30-day streak: day 1 skull, days 2–8 vertebrae (7), days 9–14 ribs (6), days 15–17 pelvis + shoulders, days 18–23 arms (6 bones), days 24–29 legs (6 bones), day 30 hands/feet + victory pose with confetti. Each bone group is an SVG toggled visible by streak count, with a brief pop-in transition for the newest bone. If a streak day is lost (after the monthly freeze is spent), the most recently earned bone pops off — the rest remains, and the bone is re-earned the next completed day.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Streaks beyond 30 days: the completed skeleton cycles fun idle poses — one pose change per new milestone (40, 50, 75, 100 days). Show it on the History screen above the calendar, with a caption like "12 days — ribcage complete!" Respect prefers-reduced-motion. Art style: cream bones, thin warm-gray outlines, smiley skull.</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">09</div>
+      <div>
+        <h2 class="prompt-title">Prompt 09: Rules-Based Routine Generator</h2>
+        <div class="ptags"><span class="ptag">Exercise library</span><span class="ptag">Client-side</span><span class="ptag">Pure functions</span><span class="ptag">Unit tests</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_09.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Replace the static routine selection with a rules-based routine generator — no AI, no API, no backend needed. If the Express server exists only for API proxying, remove it and make this a fully client-side app.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">1. Create client/src/data/exerciseLibrary.ts: a library of 35-40 safe, well-known posture and mobility exercises, each tagged: { id, name, targetArea: "upper_back"|"neck"|"chest"|"shoulders"|"core"|"hips", position: "seated"|"standing"|"floor"|"wall", equipment: "none"|"wall"|"desk_chair"|"bands"|"pullup_bar"|"doorway"|"foam_roller"|"dumbbells", loadsAreas: string[] (which body areas this exercise stresses, using the same area names as the profile's avoidAreas), intensity: "gentle"|"moderate", durationSeconds or reps, instructions (2-4 plain sentences), whyThisHelps, modification (string or null) }. Include plenty of seated and wall options so every profile type gets real variety. Choose conservative, widely recommended exercises only (chin tucks, wall angels, band pull-aparts, doorway pec stretch, thoracic rotations, scapular squeezes, etc.) — nothing ballistic or end-range loaded.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">2. Create client/src/lib/generateRoutine.ts with a pure function generateRoutine(profile, painTrend, recentSkips, seed):
+   - Filter the library hard: only equipment the user has; if seatedOnly, position must be "seated"; if canFloor is false, no "floor"; if canStand is false, no "standing"; exclude any exercise whose loadsAreas overlaps the profile's avoidAreas; exclude exercises the user has skipped 3+ times for pain.
+   - From the filtered pool, build a session that fits sessionMinutes: start with 1-2 gentle mobility exercises, cover at least 3 different targetAreas weighted toward the user's stated goals, and end with one gentle exercise. If painTrend is rising for an area, use only "gentle" intensity exercises for that area.
+   - Use the seed (date-based) so each day's routine differs from yesterday's, and a "Shuffle" button passes a random seed for a new combination. Never repeat the exact same routine two days in a row when the pool allows.
+   - If the filtered pool is too small for the time budget, use fewer exercises rather than violating any constraint, and never return an empty routine — the gentlest seated exercises are always available as a floor.</p><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">3. Wire it in: Home generates today's routine from the profile on load, Shuffle regenerates, the session player consumes it unchanged. Add unit tests for the filter logic: a seatedOnly profile must never receive a standing or floor exercise, and avoidAreas must never be loaded.</p></div>
+    </div>
+  </div><div style="display:flex;justify-content:center;margin:1.25rem 0 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+      <div style="width:1px;height:1.25rem;background:#E8E5DF;"></div>
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 10L0 0H14L7 10Z" fill="#E8E5DF"/></svg>
+    </div></div>
+
+  <div class="prompt-card">
+    <div class="prompt-header">
+      <div class="prompt-num">10</div>
+      <div>
+        <h2 class="prompt-title">Prompt 10: Accessibility & Polish Pass</h2>
+        <div class="ptags"><span class="ptag">A11y</span><span class="ptag">WCAG</span><span class="ptag">PWA</span><span class="ptag">Copy pass</span></div>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-chrome">
+        <div class="chrome-dots">
+          <div class="dot" style="background:#FF5F56"></div>
+          <div class="dot" style="background:#FFBD2E"></div>
+          <div class="dot" style="background:#27C93F"></div>
+        </div>
+        <span class="chrome-label">prompt_10.txt</span>
+      </div>
+      <div class="prompt-text"><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">Final accessibility and polish pass across the whole app:</p><div class="bullet"><span class="bullet-dot">•</span><p>Audit all touch targets to 44px minimum; session player fully operable one-handed with thumb-reachable controls.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>Timers: visual countdown + chime + vibration via navigator.vibrate where supported.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>Semantic HTML and ARIA: labeled sliders, equipment and body-area chip groups as accessible checkbox groups, focus states on everything, logical heading order. Test keyboard navigation end to end.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>prefers-reduced-motion respected globally — verify mascot, skeleton, confetti, and screen transitions all degrade to instant state changes.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>Color contrast: all text at least WCAG AA against backgrounds.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>Empty states: friendly guidance on Home before the first session, on History with no data, and a graceful screen when the API and fallbacks both fail.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>PWA check: correct icons, theme color, offline shell loads with cached routine, add-to-home-screen works on iOS Safari and Android Chrome.</p></div><div class="bullet"><span class="bullet-dot">•</span><p>Copy pass: warm, encouraging, plain language everywhere; no guilt-based messaging (missed days say "welcome back," never "you broke your streak"); pain-related copy is always neutral and supportive.</p></div><p style="font-size:0.875rem;line-height:1.75;color:#6B6860;margin-bottom:0.9rem;white-space:pre-wrap;">List anything you could not verify on mobile so I can test it by hand.</p></div>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <div class="footer-brand">
+      <span class="footer-icon">🦴</span>
+      <span class="footer-name">Unhunch</span>
+    </div>
+    <span class="footer-meta">Build Prompts · v1.0 · 2026</span>
+  </div>
+</div>
+
+</body>
+</html>

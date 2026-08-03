@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unhunch — Software Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #F7F6F3;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #1C1B18;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .header {
+    background: linear-gradient(135deg, #1C1B18 0%, #2D2B26 100%);
+    padding: 4rem 3rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-blob1 {
+    position: absolute; top: -4rem; right: -4rem;
+    width: 20rem; height: 20rem; border-radius: 50%;
+    background: #FF5E3A; opacity: 0.08; filter: blur(5rem);
+  }
+  .header-blob2 {
+    position: absolute; bottom: -4rem; left: 30%;
+    width: 18rem; height: 18rem; border-radius: 50%;
+    background: #7C6BF0; opacity: 0.10; filter: blur(5rem);
+  }
+  .header-inner { position: relative; z-index: 1; max-width: 740px; }
+  .header-eyebrow {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;
+  }
+  .header-icon {
+    width: 2.5rem; height: 2.5rem; background: #FF5E3A;
+    border-radius: 0.6rem; display: inline-flex;
+    align-items: center; justify-content: center; font-size: 1.2rem;
+  }
+  .header-label {
+    color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; font-family: monospace;
+  }
+  h1.doc-title {
+    font-size: 3.5rem; font-weight: 800; color: #fff;
+    margin: 0 0 1rem; line-height: 1.1; letter-spacing: -0.03em;
+  }
+  h1.doc-title span { color: #FF5E3A; }
+  .header-desc {
+    font-size: 1.1rem; color: rgba(255,255,255,0.65);
+    margin: 0 0 2rem; line-height: 1.6; max-width: 500px;
+  }
+  .header-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .header-tag {
+    padding: 0.3rem 0.8rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px; color: rgba(255,255,255,0.75);
+    font-size: 0.78rem; font-weight: 500; font-family: monospace;
+  }
+  .body { max-width: 740px; margin: 0 auto; padding: 3.5rem 2rem 6rem; }
+  .section { margin-bottom: 3.5rem; break-inside: avoid-page; }
+  .section-heading {
+    display: flex; align-items: baseline; gap: 0.75rem;
+    margin-bottom: 1.5rem; border-bottom: 2px solid #E8E5DF;
+    padding-bottom: 0.75rem; break-after: avoid;
+  }
+  .section-num {
+    font-size: 0.85rem; font-weight: 700; color: #FF5E3A;
+    font-family: monospace; letter-spacing: 0.05em;
+  }
+  h2.section-title {
+    font-size: 1.5rem; font-weight: 700; color: #1C1B18;
+    letter-spacing: -0.02em;
+  }
+  .subsection { margin-bottom: 2.5rem; break-inside: avoid; }
+  .subsection-heading {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 1rem; break-after: avoid;
+  }
+  .subsection-id {
+    font-size: 0.75rem; font-weight: 600; color: #7C6BF0; font-family: monospace;
+  }
+  h3.subsection-title { font-size: 1.1rem; font-weight: 600; color: #1C1B18; }
+  .bullet {
+    display: flex; gap: 0.75rem; margin-bottom: 0.6rem;
+    align-items: flex-start; break-inside: avoid;
+  }
+  .bullet-dot { color: #FF5E3A; font-size: 0.9rem; margin-top: 0.15rem; flex-shrink: 0; }
+  .bullet p { font-size: 0.95rem; line-height: 1.7; color: #6B6860; }
+  .card {
+    background: #FFFFFF; border: 1px solid #E8E5DF; border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04); break-inside: avoid;
+  }
+  .card-title { margin-bottom: 0.35rem; font-weight: 700; color: #1C1B18; font-size: 0.85rem; }
+  .card p { font-size: 0.875rem; line-height: 1.65; color: #6B6860; }
+  .alert {
+    border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem; break-inside: avoid;
+  }
+  .alert-coral { background: #FF5E3A0D; border: 1px solid #FF5E3A30; }
+  .alert-purple { background: #7C6BF00D; border: 1px solid #7C6BF030; }
+  .alert-label {
+    margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .alert-coral .alert-label { color: #FF5E3A; }
+  .alert-purple .alert-label { color: #7C6BF0; }
+  .alert p { font-size: 0.875rem; line-height: 1.6; color: #6B6860; }
+  pre {
+    background: #F0EFE9; border: 1px solid #E8E5DF; border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem; font-size: 0.78rem; line-height: 1.75;
+    overflow-x: auto; font-family: 'Fira Code', 'Cascadia Code', monospace;
+    color: #3D3B35; margin: 1rem 0; white-space: pre; break-inside: avoid;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; break-inside: avoid; }
+  thead tr { background: #1C1B18; }
+  thead th {
+    padding: 0.75rem 1rem; text-align: left; color: #fff;
+    font-weight: 600; font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  tbody tr:nth-child(even) { background: #F9F8F5; }
+  tbody tr:nth-child(odd) { background: #FFFFFF; }
+  tbody td { padding: 0.875rem 1rem; color: #6B6860; border-bottom: 1px solid #E8E5DF; line-height: 1.5; }
+  tbody td:first-child { font-weight: 600; color: #1C1B18; }
+  .tag {
+    display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 600; font-family: monospace;
+    background: #FF5E3A18; color: #FF5E3A;
+    margin-right: 0.4rem; margin-bottom: 0.3rem;
+  }
+  .step-card {
+    display: flex; gap: 1rem; margin-bottom: 0.875rem;
+    background: #FFFFFF; border: 1px solid #E8E5DF;
+    border-radius: 0.75rem; padding: 1rem 1.25rem; break-inside: avoid;
+  }
+  .step-label { flex-shrink: 0; width: 5rem; padding-top: 0.1rem; }
+  .step-label-num { font-size: 0.7rem; font-weight: 700; color: #FF5E3A; font-family: monospace; display: block; }
+  .step-label-name { font-size: 0.82rem; font-weight: 600; color: #1C1B18; }
+  .step-card p { font-size: 0.875rem; line-height: 1.65; color: #6B6860; }
+  .numbered-step { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 0.75rem; }
+  .step-num {
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    background: #FF5E3A20; color: #FF5E3A; font-size: 0.75rem; font-weight: 700;
+    flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; margin-top: 0.1rem;
+  }
+  .numbered-step p { font-size: 0.875rem; line-height: 1.65; color: #6B6860; }
+  .phase-card {
+    display: flex; gap: 1.25rem; margin-bottom: 1rem; padding: 1.25rem;
+    background: #FFFFFF; border: 1px solid #E8E5DF; border-radius: 0.75rem; break-inside: avoid;
+  }
+  .phase-bar { width: 0.25rem; border-radius: 999px; flex-shrink: 0; }
+  .phase-title { margin-bottom: 0.35rem; font-weight: 700; color: #1C1B18; font-size: 0.9rem; }
+  .phase-desc { font-size: 0.875rem; color: #6B6860; line-height: 1.65; }
+  .doc-footer {
+    border-top: 2px solid #E8E5DF; padding-top: 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-brand { display: flex; align-items: center; gap: 0.6rem; }
+  .footer-icon {
+    width: 1.75rem; height: 1.75rem; background: #FF5E3A;
+    border-radius: 0.4rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem;
+  }
+  .footer-name { font-weight: 700; color: #1C1B18; font-size: 0.95rem; }
+  .footer-meta { font-size: 0.8rem; color: #6B6860; font-family: monospace; }
+  p.body-text { font-size: 0.95rem; line-height: 1.8; color: #6B6860; margin-bottom: 1.25rem; }
+  code {
+    background: #F0EFE9; padding: 0.1rem 0.4rem; border-radius: 0.3rem; font-size: 0.85em;
+  }
+  @media print {
+    .section, .subsection, .card, .step-card, .phase-card, .alert, pre, table { break-inside: avoid; }
+    .section-heading, .subsection-heading { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-blob1"></div>
+  <div class="header-blob2"></div>
+  <div class="header-inner">
+    <div class="header-eyebrow">
+      <span class="header-icon">🦴</span>
+      <span class="header-label">Software Specification</span>
+    </div>
+    <h1 class="doc-title">Unhunch<span>.</span></h1>
+    <p class="header-desc">A mobile-first web app for desk workers with rounded shoulders, tight chests, and upper-back/neck pain. Built on Replit. Fully client-side — local-first data, rules-based routine generation, no backend required.</p>
+    <div class="header-tags">
+      <span class="header-tag">React + Vite</span>
+      <span class="header-tag">Client-side only</span>
+      <span class="header-tag">localStorage</span>
+      <span class="header-tag">PWA</span>
+      <span class="header-tag">Tailwind CSS</span>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+
+  <div class="section">
+    <div class="section-heading">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Summary</h2>
+    </div>
+    <div class="card">
+      <p>Corporate desk workers spend 8+ hours a day in flexed, shoulders-forward postures. The result is a predictable cluster: rounded upper back (thoracic kyphosis), forward head, tight pecs and hip flexors, weak mid-back, and nagging shoulder/neck pain.</p>
+    </div>
+    <p class="body-text">Unhunch generates short, personalized mobility and strengthening routines that fit the user's real constraints:</p>
+    <div class="bullet"><span class="bullet-dot">●</span><p>Equipment they actually have (a doorframe pull-up bar, a resistance band in a drawer, or nothing but a wall)</p></div>
+    <div class="bullet"><span class="bullet-dot">●</span><p>Their body and mobility situation (wheelchair users, standing-limited users, existing injuries, pain areas to avoid loading)</p></div>
+    <div class="bullet"><span class="bullet-dot">●</span><p>Their schedule (5-minute desk breaks vs. a 20-minute evening session)</p></div>
+    <p class="body-text" style="margin-top:1.25rem;">The app tracks completed sessions, self-reported pain over time, and streaks — turning posture work from a vague intention into a visible habit with feedback.</p>
+    <div class="alert alert-coral">
+      <p class="alert-label">V1 Principles</p>
+      <div class="bullet"><span class="bullet-dot">●</span><p><strong>No login.</strong> All data lives in the browser (localStorage), with export/import so nothing is lost. Accounts and sync are a later phase.</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p><strong>Rules-based routines.</strong> A curated exercise library filtered by the user's equipment, mobility constraints, and pain trends — purely client-side, no API key or backend required.</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p><strong>Not a medical product.</strong> Clear disclaimers, conservative exercise selection, and "stop if sharp pain" guidance baked into every routine.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Target Users</h2>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Persona</th><th>Situation</th><th>Needs</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Desk-bound Dana</td><td>9 hrs/day at a laptop, shoulders creeping forward, no equipment</td><td>5-min wall/desk routines, reminders, proof it's helping</td></tr>
+        <tr><td>Band-owner Ben</td><td>Has bands and a pull-up bar from a fitness phase</td><td>Progressive routines that use his gear, streak motivation</td></tr>
+        <tr><td>Wheelchair-user Wren</td><td>Full-time wheelchair user with desk job, shoulder overuse pain</td><td>Seated-only routines, no floor work, shoulder-friendly loading</td></tr>
+        <tr><td>Recovering Riley</td><td>Ankle injury, can't stand long</td><td>Standing-minimized routines that still hit the upper back</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Feature Breakdown</h2>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">3.1</span>
+        <h3 class="subsection-title">Onboarding &amp; Profile</h3>
+      </div>
+      <p class="body-text">A 4-step wizard, each step one screen, thumb-reachable controls:</p>
+      <div class="step-card"><div class="step-label"><span class="step-label-num">Step 1</span><span class="step-label-name">Goals &amp; Symptoms</span></div><p>Multi-select chips: rounded shoulders, neck pain, shoulder pain, upper-back stiffness, low-back ache, "just prevention." Optional pain rating (0–10) per selection — seeds the pain-tracking baseline.</p></div>
+      <div class="step-card"><div class="step-label"><span class="step-label-num">Step 2</span><span class="step-label-name">Equipment</span></div><p>Multi-select with icons: None/bodyweight, Wall, Desk &amp; chair (pre-checked), Resistance bands (light/medium/heavy sub-select), Pull-up bar, Doorway, Foam roller, Light dumbbells.</p></div>
+      <div class="step-card"><div class="step-label"><span class="step-label-num">Step 3</span><span class="step-label-name">Mobility &amp; Constraints</span></div><p>Position capabilities, areas to avoid loading (body map/chips), free-text constraint field, and a "None of these apply" fast path.</p></div>
+      <div class="step-card"><div class="step-label"><span class="step-label-num">Step 4</span><span class="step-label-name">Time</span></div><p>Session length: 5/10/15/20 min. 5-minute option visually promoted as "Great for building a daily habit."</p></div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">3.2</span>
+        <h3 class="subsection-title">Rules-Based Routine Generation</h3>
+      </div>
+      <div class="numbered-step"><span class="step-num">1</span><p><strong>Exercise library</strong> (<code>exerciseLibrary.ts</code>): 35–40 curated posture exercises, each tagged with targetArea, position, equipment, loadsAreas, and intensity — conservative and widely recommended only.</p></div>
+      <div class="numbered-step"><span class="step-num">2</span><p><strong>Hard filter</strong>: only equipment the user has; seated-only profiles get only seated exercises; avoidAreas exercises are excluded; exercises skipped 3+ times for pain are dropped.</p></div>
+      <div class="numbered-step"><span class="step-num">3</span><p><strong>Session builder</strong> (<code>generateRoutine.ts</code>): selects exercises to fit sessionMinutes, covers ≥3 targetAreas weighted toward stated goals, starts and ends gently. If a pain area is trending up, uses only "gentle" intensity for that area.</p></div>
+      <div class="numbered-step"><span class="step-num">4</span><p><strong>Daily variety</strong>: a date-based seed ensures each day's routine differs from yesterday's. "Shuffle" passes a random seed for a fresh combination.</p></div>
+      <div class="numbered-step"><span class="step-num">5</span><p>Client caches the routine in localStorage. If the filtered pool is too small, the generator uses fewer exercises rather than violating any constraint — it never returns empty.</p></div>
+      <div class="alert alert-purple" style="margin-top:1rem;">
+        <p class="alert-label">Fully Client-Side</p>
+        <p>No API key, no backend, no network request required for routine generation. The app works entirely offline after the initial page load.</p>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">3.3</span>
+        <h3 class="subsection-title">Session Player</h3>
+      </div>
+      <div class="bullet"><span class="bullet-dot">●</span><p>Full-screen, one exercise at a time. Big text, big Next/Back buttons, optional per-exercise countdown timer with a gentle chime.</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p>Each screen shows: name, position icon, instructions, "why this helps," and a "Can't do this one" button → logs the skip reason (pain / equipment / unclear) and advances.</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p>Skip reasons feed future generations ("user repeatedly skips floor work → stop offering it").</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p>Session end screen: quick pain check-in (0–10 sliders), one-tap mood/difficulty rating, confetti on streak milestones.</p></div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">3.4</span>
+        <h3 class="subsection-title">Progress &amp; Pain Tracking</h3>
+      </div>
+      <div class="bullet"><span class="bullet-dot">●</span><p><strong>Pain log:</strong> every check-in stores {date, area, score}. Home screen shows a 30-day sparkline per tracked area with a trend label ("improving," "flat," "worse this week").</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p><strong>Session log:</strong> date, routine ID, completed/partial, skipped exercises, difficulty rating.</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p><strong>Insights (rule-based):</strong> "You've completed 9 sessions this month. Your neck pain average dropped from 5.1 → 3.8." Correlations, not medical claims.</p></div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">3.5</span>
+        <h3 class="subsection-title">Streaks</h3>
+      </div>
+      <div class="bullet"><span class="bullet-dot">●</span><p>Streak = consecutive calendar days with at least one completed session (even a 5-minute one).</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p>Show current streak, best streak, and a monthly calendar heat map.</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p>One "streak freeze" per month (auto-applied) — so a single missed day doesn't wipe out weeks of momentum.</p></div>
+      <div class="bullet"><span class="bullet-dot">●</span><p>Pair daily streaks with the 5-minute session as the promoted default: the ask is "do something every day," not "do a full workout every day."</p></div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">3.6</span>
+        <h3 class="subsection-title">Visual Identity &amp; Delight — "Sunny the Spine" 🦴</h3>
+      </div>
+      <p class="body-text">The app should feel playful, not clinical. Core mechanic: a friendly skeleton/spine mascot that physically improves as you do.</p>
+      <div class="card"><p class="card-title">Session Progress</p><p>A cartoon spine with a smiley skull starts slumped. Each completed exercise snaps one vertebra into alignment with a satisfying animation + haptic tick. Finish → fully upright spine, big smile, tiny celebration.</p></div>
+      <div class="card"><p class="card-title">Streak Progress</p><p>A full skeleton assembled bone-by-bone across the streak calendar — day 1 earns the skull, then vertebrae, ribs, arms, legs. 30-day streak = complete happy skeleton in a victory pose. Miss a day and the newest bone pops off — visible but recoverable, never a full reset.</p></div>
+      <div class="card"><p class="card-title">Personality</p><p>Slumps and looks sleepy after missed days, stretches when you start, winces sympathetically if you log high pain (never guilt-trips). Playful about habits, never about pain or ability.</p></div>
+      <div class="card"><p class="card-title">Implementation</p><p>Inline SVG with layered bone groups toggled/animated via CSS classes — no canvas or animation library needed for V1. prefers-reduced-motion swaps animations for instant state changes.</p></div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">3.7</span>
+        <h3 class="subsection-title">Reminders (V1-optional)</h3>
+      </div>
+      <p class="body-text">Web push is unreliable on iOS PWAs; V1 ships with an in-app "next session due" banner and an "Add to calendar" (.ics download) button. Real push notifications land in Phase 2.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">3.8</span>
+        <h3 class="subsection-title">Data Portability</h3>
+      </div>
+      <p class="body-text">Settings → Export data (single JSON: profile + logs) and Import data. Bridge to future accounts and safety net for localStorage clears.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Architecture</h2>
+    </div>
+<pre>┌──────────────────────────────────────┐
+│  Client (mobile-first SPA)           │  React + Vite, PWA manifest
+│  - Onboarding wizard                 │  Tailwind CSS
+│  - Rules-based routine generator     │  localStorage persistence
+│  - Session player                    │  Recharts (sparklines, heatmap)
+│  - Charts (pain/streaks)             │
+│  - Spine &amp; skeleton mascots          │
+└──────────────────────────────────────┘
+        Fully client-side — no backend required</pre>
+    <div class="alert alert-purple">
+      <p class="alert-label">Why no backend?</p>
+      <p>Routine generation is pure logic over a local exercise library — no AI API needed. The whole app ships as a static PWA and runs completely offline after first load.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">4.1</span>
+        <h3 class="subsection-title">Component Tree</h3>
+      </div>
+<pre>&lt;App&gt;
+├── &lt;OnboardingWizard&gt;          // steps 1–4, writes profile
+├── &lt;Home&gt;
+│   ├── &lt;TodayCard&gt;             // next routine, start button
+│   ├── &lt;SpineMascot&gt;           // SVG mascot, state-driven
+│   ├── &lt;StreakWidget&gt;          // streak count + skeleton progress
+│   └── &lt;PainSparklines&gt;
+├── &lt;SessionPlayer&gt;
+│   ├── &lt;ExerciseCard&gt;          // instructions, timer, skip
+│   └── &lt;SessionSummary&gt;        // pain check-in, ratings
+├── &lt;History&gt;                   // calendar heatmap, session list
+├── &lt;Settings&gt;                  // edit profile, export/import
+└── lib/
+    ├── storage.ts              // versioned localStorage wrapper
+    ├── streaks.ts              // cadence-based streak math
+    └── generateRoutine.ts      // rules-based routine builder
+data/
+    └── exerciseLibrary.ts      // 35–40 tagged exercises</pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">4.2</span>
+        <h3 class="subsection-title">Data Model (localStorage, versioned)</h3>
+      </div>
+<pre>{
+  "schemaVersion": 1,
+  "profile": {
+    "goals": ["rounded_shoulders", "neck_pain"],
+    "equipment": ["wall", "bands_medium", "desk_chair"],
+    "mobility": {
+      "canStand": true,  "canWalk": true,  "canFloor": false,
+      "seatedOnly": false,
+      "avoidAreas": ["left_shoulder"],
+      "notes": "recent rotator cuff strain, left side"
+    },
+    "sessionMinutes": 10
+  },
+  "currentRoutine": { "...": "cached generated routine" },
+  "sessions": [
+    { "date": "2026-08-03", "routineId": "r_abc", "completed": true,
+      "skipped": [{ "exerciseId": "e2", "reason": "pain" }], "difficulty": 3 }
+  ],
+  "painLogs": [{ "date": "2026-08-03", "area": "neck", "score": 4 }],
+  "streak": { "current": 2, "best": 5, "freezeUsedThisMonth": false }
+}</pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-heading">
+        <span class="subsection-id">4.3</span>
+        <h3 class="subsection-title">Exercise Library Schema</h3>
+      </div>
+<pre>// exerciseLibrary.ts — each entry:
+{
+  "id": "string",
+  "name": "Wall Angels",
+  "targetArea": "upper_back | neck | chest | shoulders | core | hips",
+  "position": "seated | standing | floor | wall",
+  "equipment": "none | wall | desk_chair | bands | pullup_bar | doorway | foam_roller | dumbbells",
+  "loadsAreas": string[],   // body areas this exercise stresses
+  "intensity": "gentle | moderate",
+  "durationSeconds": 60,    // OR reps (one must be set)
+  "reps": null,
+  "instructions": "string, plain language, 2–4 sentences",
+  "whyThisHelps": "string, one sentence",
+  "modification": "string | null"
+}
+
+// generateRoutine.ts — pure function signature:
+generateRoutine(profile, painTrend, recentSkips, seed): Routine</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Accessibility &amp; Safety Requirements</h2>
+    </div>
+    <div class="bullet"><span class="bullet-dot">●</span><p><strong>Seated-only mode is absolute:</strong> every generated exercise must have position: seated. Enforced in code, not just in the prompt.</p></div>
+    <div class="bullet"><span class="bullet-dot">●</span><p>Touch targets ≥ 44px; session player operable one-handed; timer has visual + audio + vibration cues.</p></div>
+    <div class="bullet"><span class="bullet-dot">●</span><p>Respect <code>prefers-reduced-motion</code>; confetti and animations degrade gracefully.</p></div>
+    <div class="bullet"><span class="bullet-dot">●</span><p>Semantic HTML + ARIA labels on sliders and the body-area selector; test with VoiceOver/TalkBack.</p></div>
+    <div class="bullet"><span class="bullet-dot">●</span><p>Disclaimer shown at onboarding and in Settings: informational only, not medical advice. App explicitly suggests seeing a clinician if a tracked pain area stays ≥7/10 for two weeks.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Build Phases</h2>
+    </div>
+    <div class="phase-card"><div class="phase-bar" style="background:#FF5E3A"></div><div><p class="phase-title">Phase 1 — MVP (ship this)</p><p class="phase-desc">Onboarding wizard → routine generation with validation + static fallback → session player → pain check-ins → cadence-based streaks → export/import. PWA manifest.</p></div></div>
+    <div class="phase-card"><div class="phase-bar" style="background:#7C6BF0"></div><div><p class="phase-title">Phase 2</p><p class="phase-desc">Accounts + sync (import local JSON on first login), push/email reminders, skip-reason-driven personalization, exercise illustrations or short looping demos.</p></div></div>
+    <div class="phase-card"><div class="phase-bar" style="background:#C4C0B8"></div><div><p class="phase-title">Phase 3</p><p class="phase-desc">Progress photos (posture side-view comparison), desk-break micro-sessions (90-second timer-triggered resets), shareable streak cards.</p></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">
+      <span class="section-num">07</span>
+      <h2 class="section-title">Tooling Summary</h2>
+    </div>
+    <table>
+      <thead><tr><th>Concern</th><th>Choice</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Framework</td><td><span class="tag">React + Vite</span></td><td>Fast on Replit, huge ecosystem</td></tr>
+        <tr><td>Styling</td><td><span class="tag">Tailwind CSS</span></td><td>Rapid mobile-first layout</td></tr>
+        <tr><td>Charts</td><td><span class="tag">Recharts</span></td><td>Sparklines + heatmap with little code</td></tr>
+        <tr><td>Routines</td><td><span class="tag">Rules-based (client)</span></td><td>Curated library filtered by profile — no API key needed</td></tr>
+        <tr><td>Storage</td><td><span class="tag">localStorage</span></td><td>No-login V1; export/import as escape hatch</td></tr>
+        <tr><td>Hosting</td><td><span class="tag">Replit</span></td><td>Static deploy, works fully offline as PWA</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="doc-footer">
+    <div class="footer-brand">
+      <span class="footer-icon">🦴</span>
+      <span class="footer-name">Unhunch</span>
+    </div>
+    <span class="footer-meta">Software Spec · v1.0 · 2026</span>
+  </div>
+
+</div>
+</body>
+</html>
